@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>签到系统</title>
+    <meta charset="UTF-8"> <!-- 指定页面字符集为UTF-8 -->
+</head>
+<body>
+<h1>欢迎来到签到系统</h1>
+
+<div>
+    <h2>用户签到</h2>
+    用户ID：<input type="number" id="userIdInput" placeholder="输入用户ID">
+    <button onclick="signIn()">签到</button>
+</div>
+
+<div>
+    <h2>今日签到人数</h2>
+    <button onclick="countSignInToday()">查询</button>
+    <p id="todayCount"></p>
+</div>
+
+<div>
+    <h2>本周签到人数</h2>
+    <button onclick="countSignInThisWeek()">查询</button>
+    <p id="weekCount"></p>
+</div>
+
+<div>
+    <h2>本月用户签到次数</h2>
+    用户ID：<input type="number" id="userId">
+    <button onclick="countUserSignInThisMonth()">查询</button>
+    <p id="monthCount"></p>
+</div>
+
+<script>
+    function signIn() {
+        // 请替换为你的实际用户ID和API端点
+        let userId = document.getElementById('userIdInput').value;
+        if (!userId) {
+            alert("请先输入用户ID！");
+            return;
+        }
+        fetch('/signin?userId=' + userId, { method: 'POST' })
+            .then(response => alert('签到成功!'))
+            .catch(error => console.error('Error:', error));
+    }
+
+    function countSignInToday() {
+        fetch('/signin/count/today')
+            .then(response => response.text())
+            .then(data => document.getElementById('todayCount').innerText = data)
+            .catch(error => console.error('Error:', error));
+    }
+
+    function countSignInThisWeek() {
+        fetch('/signin/count/week')
+            .then(response => response.text())
+            .then(data => document.getElementById('weekCount').innerText = data)
+            .catch(error => console.error('Error:', error));
+    }
+
+    function countUserSignInThisMonth() {
+        let userId = document.getElementById('userId').value;
+        fetch('/signin/count/month?userId=' + userId)
+            .then(response => response.text())
+            .then(data => document.getElementById('monthCount').innerText = data)
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>可点击的中国地图</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <meta charset="UTF-8"> <!-- 指定页面字符集为UTF-8 -->
+    <style>
+        #map { height: 500px; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    // 初始化地图并设置视点为中国
+    var map = L.map('map').setView([34.3416, 108.9398], 5); // 以西安为例
+
+    // 使用高德地图作为底图
+    L.tileLayer('http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {
+        attribution: 'Map data &copy; <a href="https://www.amap.com/">高德地图</a>'
+    }).addTo(map);
+
+    // 点击地图时的处理函数
+    function onMapClick(e) {
+        alert("你点击的坐标点为: " + e.latlng.toString());
+
+        // 构建要发送的数据
+        var locationData = {
+            latitude: e.latlng.lat,
+            longitude: e.latlng.lng
+        };
+
+        // 发送AJAX请求到Spring Boot后端
+        fetch('/api/location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(locationData),
+        })
+            .then(response => response.text())
+            .then(data => {
+                console.log('成功:', data);
+            })
+            .catch((error) => {
+                console.error('错误:', error);
+            });
+    }
+
+    map.on('click', onMapClick);
+</script>
+
+</body>
+</html>

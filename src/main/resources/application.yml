@@ -1,0 +1,28 @@
+server:
+  port: 7004
+spring:
+  application:
+    name: study-redis
+  cache:
+    redis:
+      key-prefix: xiaobo
+  redis:
+    database: 3
+    host: 127.0.0.1
+    port: 6366
+    password:
+    lettuce:
+      pool:
+        max-active: 40
+        max-wait: 1000
+        min-idle: 10
+        max-idle: 30
+#logging:
+#  level:
+#    org.springframework.data: debug
+#    redis: debug
+#logging:
+#  level:
+#    io:
+#      lettuce:
+#        core: debug

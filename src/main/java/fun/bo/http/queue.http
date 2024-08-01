@@ -1,0 +1,9 @@
+
+###
+POST http://localhost:7004/stream/send
+Content-Type: application/json
+
+{
+  "key": "125",
+  "message": "初来乍到，请大家多多关照"
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>地图坐标交互</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <style>
+        #map { height: 400px; }
+        .input-group { margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="input-group">
+    <input type="text" id="locationName" placeholder="位置名称">
+    <input type="text" id="coords" placeholder="点击地图获取坐标">
+    <button onclick="addLocation()">新增</button>
+</div>
+<div class="input-group">
+    <input type="text" id="searchCoords" placeholder="点击地图设置查询中心">
+    <input type="number" id="radius" placeholder="半径(km)">
+    <button onclick="searchNearby()">查询附近的点</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map').setView([34.3416, 108.9398], 5);
+    var searchCircle;  // 用于引用查询圈
+    L.tileLayer('http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}&y={y}&z={z}', {
+        attribution: 'Map data &copy; <a href="https://www.amap.com/">高德地图</a>'
+    }).addTo(map);
+
+    map.on('click', function(e) {
+        document.getElementById('coords').value = e.latlng.lat + ", " + e.latlng.lng;
+        document.getElementById('searchCoords').value = e.latlng.lat + ", " + e.latlng.lng;
+        // 模拟反向地理编码获取位置名称
+
+    });
+
+    function addLocation() {
+        var name = document.getElementById('locationName').value || 'Unnamed Location';
+        var coords = document.getElementById('coords').value.split(", ");
+        fetch('/api/addLocation', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: name, latitude: coords[0], longitude: coords[1]}),
+        })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => console.error('Error:', error));
+    }
+
+    function searchNearby() {
+        var searchCoords = document.getElementById('searchCoords').value.split(", ");
+        var radius = document.getElementById('radius').value;
+        // 绘制查询圈
+        if (searchCircle) {
+            map.removeLayer(searchCircle);
+        }
+        searchCircle = L.circle([searchCoords[0], searchCoords[1]], {
+            color: 'blue',
+            fillColor: '#f03',
+            fillOpacity: 0.1,
+            radius: radius * 1000  // Leaflet的半径单位是米
+        }).addTo(map);
+        fetch('/api/searchNearby', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({latitude: searchCoords[0], longitude: searchCoords[1], radius: radius}),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // console.log(data)
+                data.content.forEach(result => {
+                    var point = result.content.point;
+                    var name = result.content.name;
+                    var marker = L.marker([point.y, point.x]).addTo(map);
+                    marker.bindPopup(name).openPopup();
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+
+</body>
+</html>
